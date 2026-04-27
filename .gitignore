@@ -1,0 +1,24 @@
+# 环境变量（含 API keys，绝不上传）
+.env
+
+# 临时文件
+*.list.txt
+*.concat.txt
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+# 输出文件（成品不上传，只上传代码）
+output/
+voices/yang_bai_*.mp3
+voices/my_voices.json
+
+# 日志
+*.log
+.inbox_state.json
+
+# 模型缓存
+~/.cache/
+assets/sample_*.mp3
+assets/show_cover.jpg
