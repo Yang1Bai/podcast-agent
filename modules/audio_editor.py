@@ -237,20 +237,33 @@ def generate_intro_narration(
         )
         intro_script = msg.content[0].text.strip()
 
-        # 质量检查：修正机构名/姓名错误，消除重复词
+        # 质量检查 + 格式标准化
+        welcome_end = f"让我们欢迎{guest_name}！"
         check_prompt = (
-            f"检查并修正以下播客开场介绍，直接输出修正后正文：\n"
+            f"请按以下要求修正播客开场介绍，只输出最终正文：\n"
             f"原文：{intro_script}\n\n"
-            f"必须核对：①嘉宾姓名是否为「{guest_name}」②机构是否为「{institution}」"
-            f"③有无重复词（如同一个词连续出现2次以上）\n"
-            f"如有问题直接修正，没问题原文输出。严格70字以内。"
+            f"要求：\n"
+            f"①开头必须是「欢迎来到科研面对面」，不要自我介绍\n"
+            f"②嘉宾姓名必须为「{guest_name}」，机构必须为「{institution or guest_name}」\n"
+            f"③无重复词，语义通顺，没有截断的句子\n"
+            f"④结尾必须以「{welcome_end}」结尾\n"
+            f"⑤45字以内，完整语句"
         )
         checked = client.messages.create(
             model="claude-haiku-4-5", max_tokens=150,
             messages=[{"role": "user", "content": check_prompt}]
         )
-        intro_script = checked.content[0].text.strip()[:72]
-        print(f"   📝 开场介绍: {intro_script}")
+        intro_script = checked.content[0].text.strip()
+        # 安全保证以欢迎语结尾，不硬截断
+        if not intro_script.endswith(welcome_end):
+            for punct in ['。', '！', '？']:
+                idx = intro_script.rfind(punct)
+                if idx > 10:
+                    intro_script = intro_script[:idx+1] + welcome_end
+                    break
+            else:
+                intro_script = intro_script.rstrip('，,') + '。' + welcome_end
+        print(f"   📝 开场介绍({len(intro_script)}字): {intro_script}")
 
     except Exception as e:
         print(f"   ⚠️ Claude 生成介绍失败: {e}，使用默认介绍")
