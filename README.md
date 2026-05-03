@@ -1,57 +1,107 @@
 # 🎙️ 科研面对面 Podcast Agent
 
-自动化播客制作工作流，支持：
-- 采访录音降噪、去停顿、去口头禅
-- AI 生成中文开场介绍（F5-TTS 本地声音克隆）
-- 片头片尾音乐混音（Time Sparks，渐出过渡）
-- 自动生成 Show Notes（章节、摘要、金句、社媒文案）
-- 收件箱自动监控（放入文件自动处理，Telegram 通知）
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" />
+  <img alt="Whisper" src="https://img.shields.io/badge/OpenAI%20Whisper-412991?logo=openai&logoColor=white" />
+  <img alt="F5-TTS" src="https://img.shields.io/badge/F5--TTS-Local%20Voice%20Clone-00bcd4?style=flat" />
+  <img alt="Claude" src="https://img.shields.io/badge/Anthropic%20Claude-D97757?logo=anthropic&logoColor=white" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green?style=flat" />
+</p>
 
-## 快速开始
+> **An end-to-end automated podcast production workflow for academic interviews.**  
+> Drop in a raw recording → get a broadcast-ready episode with intro, outro, show notes, and social copy — fully automated.
+
+---
+
+## ✨ What it does
+
+| Step | What happens |
+|---|---|
+| 🎤 **Ingest** | Audio dropped into inbox folder triggers the pipeline automatically |
+| 🔇 **Clean audio** | Noise reduction, silence trimming, filler-word removal (嗯、啊、那个…) |
+| 🗣️ **AI Intro** | Generates a personalized Chinese-language intro, synthesized via local F5-TTS voice clone |
+| 🎵 **Mix** | Blends intro narration with *Time Sparks* theme music, fade-in/out |
+| 📝 **Show Notes** | Claude generates structured Chinese show notes: chapters, summary, quotes, social copy |
+| 📲 **Notify** | Sends Telegram notification with final output path when done |
+
+---
+
+## 🚀 Quick Start
 
 ```bash
+git clone https://github.com/Yang1Bai/podcast-agent
 cd podcast-agent
-cp .env.example .env   # 填入 API keys
-python3 podcast_agent.py edit 采访录音.m4a --guest "嘉宾名" --institution "机构" --topic "研究方向"
+cp .env.example .env        # fill in your API keys
+pip3 install -r requirements.txt
+brew install ffmpeg
+
+# Process a single episode
+python3 podcast_agent.py edit 采访录音.m4a --guest "张教授" --institution "北京大学" --topic "钙钛矿太阳能电池"
 ```
 
-## 收件箱工作流
+---
 
-1. 把录音放入 `~/Desktop/播客待处理/`
-2. 同名文本文件写嘉宾信息（支持 .txt / .md / .note 等）
-3. 30 秒内自动开始处理，完成后 Telegram 通知
+## 📥 Inbox Workflow (Fully Automatic)
 
-## 目录结构
+1. Drop your recording into `~/Desktop/播客待处理/`
+2. Place a `.txt` / `.md` file with the same filename containing guest info
+3. The watcher picks it up within 30 seconds — no commands needed
+4. Telegram notification arrives when the episode is ready
+
+```bash
+# Start the inbox watcher
+python3 inbox_watcher.py
+```
+
+---
+
+## 🗂 Project Structure
 
 ```
 podcast-agent/
-├── podcast_agent.py       # 主命令行入口
-├── inbox_watcher.py       # 收件箱自动监控
+├── podcast_agent.py       # CLI entry point
+├── inbox_watcher.py       # File-based trigger (watchdog)
 ├── modules/
-│   ├── audio_editor.py    # 剪辑主流程
-│   ├── intro_mixer.py     # 片头混音
-│   ├── local_tts.py       # F5-TTS 本地语音合成
-│   ├── filler_remover.py  # 口头禅去除
-│   ├── show_notes.py      # Show Notes 生成
-│   ├── transcriber.py     # Whisper 转录
-│   └── voice_generator.py # ElevenLabs TTS
+│   ├── audio_editor.py    # Main editing pipeline
+│   ├── intro_mixer.py     # Intro + theme music blend
+│   ├── local_tts.py       # F5-TTS local voice synthesis
+│   ├── filler_remover.py  # Chinese filler-word removal
+│   ├── show_notes.py      # LLM show notes generation
+│   ├── transcriber.py     # Whisper transcription
+│   └── voice_generator.py # ElevenLabs TTS (cloud fallback)
 ├── assets/
-│   ├── intro.mp3          # 片头音乐（Time Sparks）
-│   └── outro.mp3          # 片尾音乐
-└── voices/                # 声音克隆参考音频（本地，不上传）
+│   ├── intro.mp3          # Theme music (Time Sparks)
+│   └── outro.mp3
+└── voices/                # Local voice reference audio (gitignored)
 ```
 
-## 依赖
+---
+
+## ⚙️ Environment Variables
 
 ```bash
-pip3 install f5-tts openai-whisper anthropic openai elevenlabs pydub python-dotenv watchdog --break-system-packages
+ELEVENLABS_API_KEY=...    # ElevenLabs TTS (cloud fallback)
+ANTHROPIC_API_KEY=...     # Claude for show notes generation
+OPENAI_API_KEY=...        # Whisper transcription
+TELEGRAM_BOT_TOKEN=...    # Completion notifications
+TELEGRAM_CHAT_ID=...
+```
+
+---
+
+## 📦 Dependencies
+
+```bash
+pip3 install f5-tts openai-whisper anthropic openai elevenlabs pydub python-dotenv watchdog
 brew install ffmpeg
 ```
 
-## 环境变量
+---
 
-```
-ELEVENLABS_API_KEY=...
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-```
+## 🌐 Background
+
+**科研面对面** (Science Face-to-Face) is an academic interview podcast series. This agent was built to eliminate the manual post-production bottleneck — from raw field recording to publishable episode in minutes, not hours.
+
+---
+
+*Built with Python · Whisper · F5-TTS · Claude · ffmpeg*
